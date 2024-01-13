@@ -8,81 +8,11 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-bool IsValidIP(const std::string &ip)
-{
-    std::regex ipRegex("^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\."
-                       "(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\."
-                       "(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\."
-                       "(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$");
+bool IsValidIP(const std::string &ip);
+void DisplayAsciiArt();
+std::string GetServerInfo(const std::string &ipAddress, int port);
+void DisplayMenu();
 
-    return std::regex_match(ip, ipRegex);
-}
-
-void DisplayAsciiArt()
-{
-    std::cout << R"(
-  _____  ________      _______ _    _          _____  ______ 
- |  __ \|  ____\ \    / / ____| |  | |   /\   |  __ \|  ____|
- | |  | | |__   \ \  / / (___ | |__| |  /  \  | |__) | |__   
- | |  | |  __|   \ \/ / \___ \|  __  | / /\ \ |  _  /|  __|  
- | |__| | |____   \  /  ____) | |  | |/ ____ \| | \ \| |____ 
- |_____/|______|   \/  |_____/|_|  |_/_/    \_\_|  \_\______|      
-
-
-)";
-}
-
-std::string GetServerInfo(const std::string &ipAddress, int port)
-{
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET)
-    {
-        std::cerr << "Failed to create socket.\n";
-        return "";
-    }
-
-    sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
-    serverAddr.sin_port = htons(port);
-
-    if (connect(sock, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR)
-    {
-        std::cerr << "Failed to connect to the server.\n";
-        closesocket(sock);
-        return "";
-    }
-
-    std::string httpRequest = "GET /info.json HTTP/1.1\r\nHost: " + ipAddress + "\r\nConnection: close\r\n\r\n";
-    if (send(sock, httpRequest.c_str(), httpRequest.length(), 0) == SOCKET_ERROR)
-    {
-        std::cerr << "Failed to send HTTP request.\n";
-        closesocket(sock);
-        return "";
-    }
-
-    char buffer[4096];
-    std::string serverResponse;
-
-    int bytesRead;
-    while ((bytesRead = recv(sock, buffer, sizeof(buffer) - 1, 0)) > 0)
-    {
-        buffer[bytesRead] = '\0';
-        serverResponse += buffer;
-    }
-
-    closesocket(sock);
-    return serverResponse;
-}
-
-void DisplayMenu()
-{
-    std::cout << "\n=== Menu ===\n";
-    std::cout << "1. Display Server Info\n";
-    std::cout << "2. Save Server Info to a Text File\n";
-    std::cout << "3. Connect to Server\n";
-    std::cout << "4. Exit\n";
-}
 
 int main()
 {
@@ -93,7 +23,7 @@ int main()
         return 1;
     }
 
-    DisplayAsciiArt(); 
+    DisplayAsciiArt();
     std::string ipAddress;
     int port;
 
@@ -168,4 +98,80 @@ int main()
             std::cout << "Invalid choice. Try again.\n";
         }
     }
+}
+
+bool IsValidIP(const std::string &ip)
+{
+    std::regex ipRegex("^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\."
+                       "(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\."
+                       "(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\."
+                       "(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$");
+
+    return std::regex_match(ip, ipRegex);
+}
+
+void DisplayAsciiArt()
+{
+    std::cout << R"(
+  _____  ________      _______ _    _          _____  ______ 
+ |  __ \|  ____\ \    / / ____| |  | |   /\   |  __ \|  ____|
+ | |  | | |__   \ \  / / (___ | |__| |  /  \  | |__) | |__   
+ | |  | |  __|   \ \/ / \___ \|  __  | / /\ \ |  _  /|  __|  
+ | |__| | |____   \  /  ____) | |  | |/ ____ \| | \ \| |____ 
+ |_____/|______|   \/  |_____/|_|  |_/_/    \_\_|  \_\______|      
+
+
+)";
+}
+
+std::string GetServerInfo(const std::string &ipAddress, int port)
+{
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET)
+    {
+        std::cerr << "Failed to create socket.\n";
+        return "";
+    }
+
+    sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = inet_addr(ipAddress.c_str());
+    serverAddr.sin_port = htons(port);
+
+    if (connect(sock, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR)
+    {
+        std::cerr << "Failed to connect to the server.\n";
+        closesocket(sock);
+        return "";
+    }
+
+    std::string httpRequest = "GET /info.json HTTP/1.1\r\nHost: " + ipAddress + "\r\nConnection: close\r\n\r\n";
+    if (send(sock, httpRequest.c_str(), httpRequest.length(), 0) == SOCKET_ERROR)
+    {
+        std::cerr << "Failed to send HTTP request.\n";
+        closesocket(sock);
+        return "";
+    }
+
+    char buffer[4096];
+    std::string serverResponse;
+
+    int bytesRead;
+    while ((bytesRead = recv(sock, buffer, sizeof(buffer) - 1, 0)) > 0)
+    {
+        buffer[bytesRead] = '\0';
+        serverResponse += buffer;
+    }
+
+    closesocket(sock);
+    return serverResponse;
+}
+
+void DisplayMenu()
+{
+    std::cout << "\n=== Menu ===\n";
+    std::cout << "1. Display Server Info\n";
+    std::cout << "2. Save Server Info to a Text File\n";
+    std::cout << "3. Connect to Server\n";
+    std::cout << "4. Exit\n";
 }
