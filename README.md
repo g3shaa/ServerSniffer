@@ -8,15 +8,15 @@
   <li>Winsock Library (<code>ws2_32.lib</code>)</li>
 </ul>
 <h2>Functions</h2>
-#IsValidIP
+<h5>IsValidIP</h5>
 <p>This function takes a string representing an IP address and uses a regular expression to validate its format. It returns a boolean indicating whether the IP address is valid.</p>
-#DisplayAsciiArt
+<h5>DisplayAsciiArt</h5>
 <p>Displays an ASCII art representation of the program's title.</p>
-#GetServerInfo
+<h5>GetServerInfo</h5>
 <p>Establishes a TCP connection with the specified server, sends an HTTP request, and retrieves the server's response. The function returns the server's response as a string.</p>
-#DisplayMenu
+<h5>DisplayMenu</h5>
 <p>Displays a simple menu in the console, providing options for the user to interact with the program.</p>
-#Main Function
+<h5>Main Function</h5>
 <p>The <code>main</code> function serves as the entry point for the program. It initializes the Winsock library, displays the program's ASCII art title, prompts the user for server details, and enters a loop allowing the user to choose from various options in the menu.</p>
 <h2>Usage</h2>
 <ol>
